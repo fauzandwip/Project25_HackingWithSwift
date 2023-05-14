@@ -79,6 +79,20 @@ extension ViewController: UIImagePickerControllerDelegate, UINavigationControlle
         
         images.insert(image, at: 0)
         self.collectionView.reloadData()
+        
+        guard let mcSession = mcSession else { return }
+
+        if mcSession.connectedPeers.count > 0 {
+            if let imageData = image.pngData() {
+                do {
+                    try mcSession.send(imageData, toPeers: mcSession.connectedPeers, with: .reliable)
+                } catch {
+                    let ac = UIAlertController(title: "Send error", message: error.localizedDescription, preferredStyle: .alert)
+                    ac.addAction(UIAlertAction(title: "OK", style: .default))
+                    present(ac, animated: true)
+                }
+            }
+        }
     }
     
 }
@@ -97,9 +111,28 @@ extension ViewController: MCSessionDelegate, MCBrowserViewControllerDelegate {
     }
     
     func session(_ session: MCSession, peer peerID: MCPeerID, didChange state: MCSessionState) {
+        switch state {
+        case .connected:
+            print("Connected: \(peerID.displayName)")
+            
+        case .connecting:
+            print("Connecting: \(peerID.displayName)")
+            
+        case .notConnected:
+            print("Not Connected: \(peerID.displayName)")
+            
+        @unknown default:
+            print("Unknown state received: \(peerID.displayName)")
+        }
     }
     
     func session(_ session: MCSession, didReceive data: Data, fromPeer peerID: MCPeerID) {
+        DispatchQueue.main.async {
+            if let image = UIImage(data: data) {
+                self.images.insert(image, at: 0)
+                self.collectionView.reloadData()
+            }
+        }
     }
     
     func session(_ session: MCSession, didReceive stream: InputStream, withName streamName: String, fromPeer peerID: MCPeerID) {
