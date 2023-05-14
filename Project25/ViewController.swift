@@ -116,11 +116,19 @@ extension ViewController: MCSessionDelegate, MCBrowserViewControllerDelegate {
     
     
     func startHosting(action: UIAlertAction) {
+        guard let mcSession = mcSession else { return }
         
+        mcAdvertiserAssistant = MCAdvertiserAssistant(serviceType: "hws-project25", discoveryInfo: nil, session: mcSession)
+        mcAdvertiserAssistant?.start()
     }
     
     func joinSession(action: UIAlertAction) {
+        guard let mcSession = mcSession else { return }
         
+        let mcBrowser = MCBrowserViewController(serviceType: "hws-project25", session: mcSession)
+        mcBrowser.delegate = self
+        
+        present(mcBrowser, animated: true)
     }
     
 }
