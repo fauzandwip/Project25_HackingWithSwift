@@ -23,8 +23,11 @@ class ViewController: UICollectionViewController {
         mcSession?.delegate = self
         
         title = "Selfie Share"
+        let peer = UIBarButtonItem(barButtonSystemItem: .bookmarks, target: self, action: #selector(connectedPeers))
+        let showConnection = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(showConnectionPrompt))
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(barButtonSystemItem: .camera, target: self, action: #selector(importPicture))
-        navigationItem.leftBarButtonItem = UIBarButtonItem(barButtonSystemItem: .add, target: self, action: #selector(showConnectionPrompt))
+        navigationItem.leftBarButtonItems = [showConnection, peer]
 
     }
     
@@ -33,6 +36,15 @@ class ViewController: UICollectionViewController {
         ac.addAction(UIAlertAction(title: "Host a session", style: .default, handler: startHosting))
         ac.addAction(UIAlertAction(title: "Join a session", style: .default, handler: joinSession))
         ac.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+        
+        present(ac, animated: true)
+    }
+    
+    @objc func connectedPeers() {
+        let ac = UIAlertController(title: "Connected peers", message: nil, preferredStyle: .actionSheet)
+        for peer in mcSession?.connectedPeers ?? [] {
+            ac.addAction(UIAlertAction(title: peer.displayName, style: .default))
+        }
         
         present(ac, animated: true)
     }
